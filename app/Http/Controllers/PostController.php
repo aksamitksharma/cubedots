@@ -93,7 +93,7 @@ class PostController extends Controller
     {
         $data['post'] = Post::where('slug', 'like', $slug.'%')
         ->with('user')
-        ->get();
+        ->first();
         return view('post.show',$data);
     }
 
@@ -105,7 +105,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data['post'] = Post::find($id);
+        return view('post.edit',$data);
     }
 
     /**
@@ -117,7 +118,20 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);
+
+        $post = Post::find($id);
+        $post->slug = $this->createSlug(Str::slug($request->title));
+        $post->title = $request->title;
+        $post->description = $request->description;
+   
+        $post->update();
+    
+        return Redirect::to('posts')
+       ->with('success','Greate! posts updated successfully.');
     }
 
     /**

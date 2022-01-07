@@ -36,13 +36,18 @@
                      <td>{{ $post->description }}</td>
                      <td>
 
-                     <button type="submit" class="btn btn-warning btn-sm"><a href="{{ url('posts/'.$post->slug) }}">View</a></button>
-                      
+                      <button type="submit" class="btn btn-warning btn-sm mt-1 mr-1">
+                       <a href="{{ url('posts',$post->slug) }}">View</a>
+                      </button>
+
+                      <button type="submit" class="btn btn-warning btn-sm mt-1 mr-1">
+                       <a href="{{ url('posts/'.$post->id.'/edit') }}">Edit</a>
+                      </button>
 
                       <form method="post" action="{{ route('posts.destroy', $post->id) }}">
-                          @csrf
-                          <input type="hidden" name="_method" value="DELETE" />
-                          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                          {{ csrf_field() }}
+                          {{ method_field('PUT') }}
+                          <button type="submit" class="btn btn-danger btn-sm mt-1 mr-1">Delete</button>
                       </form>
                     
                     </td>

@@ -23,10 +23,10 @@
             <div class="col-12">
              <div class="list-group">
               <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
-                  <h5 class="mb-1">{{$post[0]->title}}</h5>
-                  <small>Posted By: {{$post[0]->user->name}}</small>
-                  <small>{{$post[0]->created_at}}</small>
-                <p class="mb-1">{{$post[0]->description}}</small>
+                  <h5 class="mb-1">{{$post->title}}</h5>
+                  <small>Posted By: {{$post->user->name}}</small>
+                  <small>{{$post->created_at}}</small>
+                <p class="mb-1">{{$post->description}}</small>
               </a>
             </div>
              
