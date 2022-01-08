@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Redirect;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Support\Str;
+use Image;
 
 class PostController extends Controller
 {
@@ -15,9 +17,14 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data['posts'] = Post::orderBy('id','desc')->paginate(6);
+        if(empty($request->get('tag'))){
+            $data['posts'] = Post::orderBy('id','desc')->paginate(6);
+        }else{
+            $data['posts'] = Post::where('tags', 'LIKE', '%'.$request->get('tag').'%')->orderBy('id','desc')->paginate(6);
+        }
+        $data['tags'] = Tag::get();
         return view('post.list',$data);
     }
 
@@ -43,19 +50,63 @@ class PostController extends Controller
             'title' => 'required',
             'description' => 'required',
         ]);
-
        
-        $insert = [
-            'user_id' => Auth::id(),
-            'slug' => $this->createSlug(Str::slug($request->title)),
-            'title' => $request->title,
-            'description' => $request->description,
-        ];
-   
-        Post::insertGetId($insert);
+        if($request->file('fImage'))
+        $imagename = $this->resizeImagePost($request->file('fImage'));
+        else
+        $imagename="";
+
+        $postObj = new Post;
+        $postObj->user_id =  Auth::id();
+        $postObj->slug = $this->createSlug(Str::slug($request->title));
+        $postObj->title = $request->title;
+        $postObj->description = $request->description;
+        $postObj->tags = $request->tags;
+        $postObj->featured_image = $imagename;
+
+        if($postObj->save()){
+            $this->saveTags($request->tags);
+            return Redirect::to('posts')
+            ->with('success','Greate! posts created successfully.');
+        }else{
+            return Redirect::to('posts')
+            ->with('success','Oops! posts not created, try again');
+        }
     
-        return Redirect::to('posts')
-       ->with('success','Greate! posts created successfully.');
+       
+    }
+
+    public function saveTags($tags){
+
+        $tagArr = explode(',', $tags);
+        
+        foreach($tagArr as $tag){
+            $tagsData = Tag::select('*')->where('tags', 'LIKE', '%'.trim($tag).'%')->get();
+            echo $tag.'<br>';
+            if($tagsData->isEmpty()){
+                $ta = new Tag;
+                $ta->tags = $tag;
+                $ta->save();
+            }
+        }
+    }
+
+    public function resizeImagePost($image)
+    {
+        $imagename = time().'.'.$image->getClientOriginalExtension();
+     
+   
+        $destinationPath = public_path('\thumbnail');
+        $img = Image::make($image->getRealPath());
+        $img->resize(100, 100, function ($constraint) {
+		    $constraint->aspectRatio();
+		})->save($destinationPath.'/'.$imagename);
+
+
+        $destinationPath = public_path('\images');
+        $image->move($destinationPath, $imagename);
+
+        return $imagename;
     }
 
     public function createSlug($slug)
@@ -126,12 +177,13 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->slug = $this->createSlug(Str::slug($request->title));
         $post->title = $request->title;
+        $post->tags = $request->tags;
         $post->description = $request->description;
    
         $post->update();
     
         return Redirect::to('posts')
-       ->with('success','Greate! posts updated successfully.');
+       ->with('success','Great! posts updated successfully.');
     }
 
     /**

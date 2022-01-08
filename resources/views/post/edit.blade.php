@@ -15,7 +15,7 @@
   <body>
     <div class="container">
  
-      <form action="{{ route('posts.update', $post->id) }}" method="POST" name="update_post">
+      <form action="{{ route('posts.update', $post->id) }}" method="POST" name="update_post" enctype="multipart/form-data">
         {{ csrf_field() }}
         {{ method_field('PUT') }}
  
@@ -39,6 +39,12 @@
                     <strong>Description</strong>
                     <textarea class="form-control" col="4" name="description" placeholder="Enter Description">{{$post->description}}</textarea>
                     <span class="text-danger">{{ $errors->first('description') }}</span>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <strong>Tags</strong>
+                    <input class="form-control" value="{{$post->tags}}" col="4" name="tags" placeholder="Tags">
                 </div>
             </div>
             <div class="col-md-12">

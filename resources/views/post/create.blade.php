@@ -15,7 +15,7 @@
   <body>
     <div class="container">
  
-      <form action="{{ route('posts.store') }}" method="POST" name="add_post">
+      <form action="{{ route('posts.store') }}" method="POST" name="add_post" enctype="multipart/form-data">
         {{ csrf_field() }}
  
         <div class="row">
@@ -38,6 +38,12 @@
                     <strong>Description</strong>
                     <textarea class="form-control" col="4" name="description" placeholder="Enter Description"></textarea>
                     <span class="text-danger">{{ $errors->first('description') }}</span>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="form-group">
+                    <strong>Tags</strong>
+                    <input class="form-control" col="4" name="tags" placeholder="Tags">
                 </div>
             </div>
             <div class="col-md-12">

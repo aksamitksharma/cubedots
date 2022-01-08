@@ -23,6 +23,7 @@
             <div class="col-12">
              <div class="list-group">
               <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
+              <img class="sealImage" src="{{  public_path('\image\\'.$post->featured_image) }}" alt="{{$post->featured_image}}" />
                   <h5 class="mb-1">{{$post->title}}</h5>
                   <small>Posted By: {{$post->user->name}}</small>
                   <small>{{$post->created_at}}</small>
