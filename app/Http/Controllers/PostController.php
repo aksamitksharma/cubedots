@@ -33,9 +33,14 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('post.create');
+        //getting the current logged in user
+        $user = $request->user();
+        if($user->can('create-posts'))
+            return view('post.create');
+        else
+        return view('error.e403');
     }
 
     /**
@@ -46,31 +51,36 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
-       
-        if($request->file('fImage'))
-        $imagename = $this->resizeImagePost($request->file('fImage'));
-        else
-        $imagename="";
+        $user = $request->user();
+        if($user->can('create-posts')){
+            $request->validate([
+                'title' => 'required',
+                'description' => 'required',
+            ]);
+        
+            if($request->file('fImage'))
+            $imagename = $this->resizeImagePost($request->file('fImage'));
+            else
+            $imagename="";
 
-        $postObj = new Post;
-        $postObj->user_id =  Auth::id();
-        $postObj->slug = $this->createSlug(Str::slug($request->title));
-        $postObj->title = $request->title;
-        $postObj->description = $request->description;
-        $postObj->tags = $request->tags;
-        $postObj->featured_image = $imagename;
+            $postObj = new Post;
+            $postObj->user_id =  Auth::id();
+            $postObj->slug = $this->createSlug(Str::slug($request->title));
+            $postObj->title = $request->title;
+            $postObj->description = $request->description;
+            $postObj->tags = $request->tags;
+            $postObj->featured_image = $imagename;
 
-        if($postObj->save()){
-            $this->saveTags($request->tags);
-            return Redirect::to('posts')
-            ->with('success','Greate! posts created successfully.');
+            if($postObj->save()){
+                $this->saveTags($request->tags);
+                return Redirect::to('posts')
+                ->with('success','Greate! posts created successfully.');
+            }else{
+                return Redirect::to('posts')
+                ->with('success','Oops! posts not created, try again');
+            }
         }else{
-            return Redirect::to('posts')
-            ->with('success','Oops! posts not created, try again');
+            return view('error.e403');
         }
     
        
@@ -82,7 +92,6 @@ class PostController extends Controller
         
         foreach($tagArr as $tag){
             $tagsData = Tag::select('*')->where('tags', 'LIKE', '%'.trim($tag).'%')->get();
-            echo $tag.'<br>';
             if($tagsData->isEmpty()){
                 $ta = new Tag;
                 $ta->tags = $tag;
@@ -154,10 +163,16 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, Request $request)
     {
-        $data['post'] = Post::find($id);
-        return view('post.edit',$data);
+        $user = $request->user();
+        if($user->can('edit-posts')){
+            $data['post'] = Post::find($id);
+            return view('post.edit',$data);
+        }else{
+            return view('error.e403');
+        }
+        
     }
 
     /**
@@ -169,21 +184,30 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
+        $user = $request->user();
+        if($user->can('edit-posts')){
+            $request->validate([
+                'title' => 'required',
+                'description' => 'required',
+            ]);
 
-        $post = Post::find($id);
-        $post->slug = $this->createSlug(Str::slug($request->title));
-        $post->title = $request->title;
-        $post->tags = $request->tags;
-        $post->description = $request->description;
-   
-        $post->update();
+            $post = Post::find($id);
+            $post->slug = $this->createSlug(Str::slug($request->title));
+            $post->title = $request->title;
+            $post->tags = $request->tags;
+            $post->description = $request->description;
     
-        return Redirect::to('posts')
-       ->with('success','Great! posts updated successfully.');
+            if($post->update()){
+                $this->saveTags($request->tags);
+                return Redirect::to('posts')
+                ->with('success','Great! posts updated successfully.');
+            }else{
+                return Redirect::to('posts')
+                ->with('success','Oops! posts not updated, try again.');
+            }
+        }else{
+            return view('error.e403');
+        }
     }
 
     /**
@@ -192,9 +216,14 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
-        Post::find($id)->delete();
-        return back()->with('success', 'Post Deleted successfully');
+        $user = $request->user();
+        if($user->can('delete-posts')){
+            Post::find($id)->delete();
+            return back()->with('success', 'Post Deleted successfully');
+        }else{
+            return view('error.e403');
+        }
     }
 }
