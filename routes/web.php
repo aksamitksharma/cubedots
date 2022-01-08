@@ -21,7 +21,7 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
 
-Route::resource('posts', 'PostController'); 
+Route::resource('posts', 'PostController')->middleware('auth:sanctum');
 
 // Use this URL to insert test data
 Route::get('/roles', 'PermissionController@permission');
