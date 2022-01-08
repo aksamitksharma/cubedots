@@ -14,4 +14,4 @@ Email: aksamitksharma@gmail.com
 
 ## Generate dummy data
 
-To generate dummy user, roles and permission use <a href="http://domain.com/roles"></a> after doing other configurations like database connection and migrations.
+To generate dummy user, roles and permission use <a href="http://domain.com/roles">Create Dummy Data</a> after doing other configurations like database connection and migrations.
